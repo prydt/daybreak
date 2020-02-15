@@ -13,16 +13,20 @@ class Location:
     recovered: int = 0
     death: int = 0
 
-    def __init__(self, state, country, date, confirmed, suspected, recovered, death):
+    def __init__(
+        self, state, country, date, confirmed=0, suspected=0, recovered=0, death=0
+    ):
         self.state = state
         self.country = country
         self.date = date
-        self.confirmed = confirmed
-        self.suspected = suspected
-        self.recovered = recovered
-        self.death = death
+        self.confirmed = confirmed if isinstance(confirmed, int) else 0
+        self.suspected = suspected if isinstance(suspected, int) else 0
+        self.recovered = recovered if isinstance(recovered, int) else 0
+        self.death = death if isinstance(death, int) else 0
+
 
 data_dict = {}
+
 
 def extract_from_file(filename):
     with open(filename) as csvfile:
