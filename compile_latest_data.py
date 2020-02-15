@@ -19,10 +19,10 @@ class Location:
         self.state = state
         self.country = country
         self.date = date
-        self.confirmed = confirmed if isinstance(confirmed, int) else 0
-        self.suspected = suspected if isinstance(suspected, int) else 0
-        self.recovered = recovered if isinstance(recovered, int) else 0
-        self.death = death if isinstance(death, int) else 0
+        self.confirmed = confirmed
+        self.suspected = suspected
+        self.recovered = recovered
+        self.death = death
 
 
 data_dict = {}
