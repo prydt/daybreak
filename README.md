@@ -1,3 +1,4 @@
+![Image of Daybreak](image.png)
 # Daybreak
 
 > Bringing to light an outbreak
