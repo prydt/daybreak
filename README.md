@@ -13,3 +13,6 @@ Daybreak is an online tool that when given a location can predict a "danger quot
 3. set up virtual environment `virtualenv env`
 4. install required packages `./env/bin/pip i -r requirements.txt`
 5. run the server `./env/bin/flask run` and go to the site! (localhost:5000/index.html)
+
+
+This project was made in 24hr at the HackUNT hackathon! Made by Pranoy Dutta, Pranay Gosar, Pranav Logan.
