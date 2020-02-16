@@ -38,7 +38,7 @@ class Location:
         self.state = state
         self.country = country
         if state:
-            self.name = state + "," + country
+            self.name = state + ", " + country
         else:
             self.name = country
         self.date = date
@@ -137,7 +137,9 @@ def danger_coef(distance, confirmed_cases, hdi_rank):
     return fractional(1, delta - 7)
 
 
-def predicted_confirmed(population, inital_amt):
+def predicted_confirmed(population, inital_amt, danger):
+    if inital_amt < 0.0001:
+        return danger
     return population / (
         (1 + ((population - inital_amt) / inital_amt) * e ** ((-1 * 1.888) / 103))
     )
@@ -149,10 +151,10 @@ load_data()
 
 app = Flask(__name__, static_url_path="")
 
+
 @app.route("/<path:path>")
 def root():
     return send_from_directory("/static", path)
-
 
 
 @app.route("/endpoint", methods=["POST"])
@@ -170,23 +172,23 @@ def endpoint():
         )
         hdi = get_HDI_rank(country)
 
-        danger = "{0:.2f}%".format(
-            danger_coef(closest_dist, confirmed_cases, int(hdi)) * 100
+        danger = "{0:.2f}".format(
+            danger_coef(closest_dist, int(confirmed_cases), int(hdi)) * 100
         )
 
         pop = int(get_population(closest[0]))
-        predicted = predicted_confirmed(pop, confirmed_cases)
+        predicted = predicted_confirmed(pop, int(confirmed_cases), float(danger))
         print(confirmed_cases)
         print(predicted)
         danger2 = "{0:.2f}%".format(
-            danger_coef(closest_dist, predicted, int(hdi)) * 100
+            danger_coef(closest_dist, int(predicted), int(hdi)) * 100
         )
 
         out = {
-            "closest_name": closest[0],
-            "distance": closest_dist,
+            "closest_name": locations[closest[0]].name,
+            "distance": "{0:.2f}".format(closest_dist),
             "confirmed_cases": confirmed_cases,
-            "danger_coef": danger,
+            "danger_coef": '{}%'.format(danger),
             "predicted_danger_coef": danger2,
         }
         return jsonify(out)

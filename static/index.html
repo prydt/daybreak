@@ -8,12 +8,24 @@
 <style>
 body {
     font-family: 'Montserrat', sans-serif;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    margin: 0px;
+}
+#back {
+    position: absolute;
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+    background: white;
 }
 h1 {
     font-weight: lighter;
     font-size: 5em;
     margin-top: 0px;
     margin-bottom: 0px;
+    color: black;
 }
 #top {
     display: flex;
@@ -24,35 +36,121 @@ h1 {
     padding-top: 10px;
     width: 130px;
     height: 130px;
+    color: black;
 }
 #toplogo {
+    padding-top: 40px;
     display: inline;
     margin: 0 auto;
 }
 input{
     display: block;
     margin: 0 auto;
+    color: black;
+}
+
+@keyframes dropdown{
+    from {
+        opacity: 0%;
+        transform: translate(0px, -20px);
+    }
+    to {
+        opacity: 100%;
+        transform: translate(0px, 0px);
+    }
+}
+
+#output{
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 30px;
+    opacity: 0%;
+    transform: translate(0px, -20px);
+    line-height: 30px;
+    color: black;
+}
+
+.drop {
+    animation: dropdown 3s forwards
+}
+.invert {
+    -webkit-filter: invert(1);
+    filter: invert(1);
 }
 </style>
 </head>
 <body>
-    <div id="top">
+    <div id="back" class="i">
+    <div id="top" class="i">
         <div id="toplogo">
-            <img id="logo" src="./foggy-full-moon-night.svg" alt="daybreak logo"/>
-            <h1>Daybreak</h1>
-            <p>Bringing light to an outbreak.</p>
+            <img class="i" id="logo" src="./foggy-full-moon-night.svg" alt="daybreak logo"/>
+            <h1 class="i">Daybreak</h1>
+            <p class="i">Bringing light to an outbreak.</p>
         </div>
     </div>
     <div id="content">
-        <input id="input" type="text"/>
+        <input class="i" id="input" type="text" placeholder="enter a location"/>
+
+        <p id="output" class="i">
+Avoid touching your eyes, nose, and mouth with unwashed hands.
+Cover your cough or sneeze with a tissue, then throw the tissue in the trash.
+Avoid contact with people who are sick.
+Regularly learn and disinfect frequently touched objects and surfaces using a reguhousehold cleaning wipe.
+Stay home when you are sick.
+Use a face mask to filter the air you breath in
+Receive medical attention if you feel sick
+        </p>
     </div>
 
+    <button id="dark" class="i">Toggle Dark Mode</button>
+    </div>
     <script>
+
+        var advice = [
+
+        ]
+
+    var toggle = true
+    $('#dark').click(function()
+    {
+        if(toggle){
+        $(".i").each(function() {
+            $(this).addClass('invert')
+            console.log(($(this)))
+        });
+        toggle = !toggle
+        }
+        else
+        {
+            $(".i").each(function() {
+                $(this).removeClass('invert')
+            });
+
+            toggle = !toggle
+        }
+    })
+
     $("#input").on('keyup', function (e) {
     if (e.keyCode === 13) {
         var text = e.target.value
+        var f = new FormData()
+        f.append('location', text)
 
-        console.log(text)
+        fetch('/endpoint', {
+            method: 'POST',
+            body: f
+        })
+        .then((response) => response.json())
+        .then(function(data) {
+            $('#output').text("Danger Coefficient: " + data.danger_coef + "\nThe closest incident of the Wuhan Coronavirus is " + data.closest_name + " which is " + data.distance + " miles away with " + data.confirmed_cases + " confirmed cases. The danger coefficient is expected to increase to " +  data.predicted_danger_coef + " after a 3-month period.")
+            $('#output').addClass('drop')
+        })
+        .catch((error) => {
+            // error
+            $('#output').text("SERVER ERROR O_O whoops sowwy")
+            $('#output').addClass('drop')
+
+        });
     }
     });
     </script>
