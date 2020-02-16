@@ -1,4 +1,5 @@
 <img align="center" src="image.png" alt="Image of Daybreak">
+
 # Daybreak
 
 > Bringing to light an outbreak
