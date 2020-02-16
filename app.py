@@ -12,7 +12,6 @@ locations = {}
 HDIs = {}
 geolocator = Nominatim(user_agent="daybreak-app")
 
-
 class Location:
     state: str
     country: str
@@ -180,7 +179,7 @@ def endpoint():
         predicted = predicted_confirmed(pop, int(confirmed_cases), float(danger))
         print(confirmed_cases)
         print(predicted)
-        danger2 = "{0:.2f}%".format(
+        danger2 = "{0:.2f}".format(
             danger_coef(closest_dist, int(predicted), int(hdi)) * 100
         )
 
@@ -188,7 +187,7 @@ def endpoint():
             "closest_name": locations[closest[0]].name,
             "distance": "{0:.2f}".format(closest_dist),
             "confirmed_cases": confirmed_cases,
-            "danger_coef": '{}%'.format(danger),
+            "danger_coef": '{}'.format(danger),
             "predicted_danger_coef": danger2,
         }
         return jsonify(out)
