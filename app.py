@@ -1,5 +1,5 @@
 import csv
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory, redirect, url_for
 import dateparser
 from geopy.geocoders import Nominatim
 from geopy import distance
@@ -11,6 +11,7 @@ from math import e
 locations = {}
 HDIs = {}
 geolocator = Nominatim(user_agent="daybreak-app")
+
 
 class Location:
     state: str
@@ -99,8 +100,10 @@ def output_to_csv(outfile):
 def get_HDI_rank(country):
     return HDIs[country]
 
+
 def get_population(key):
     return locations[key].population
+
 
 def find_closest(location):
     lat = location.latitude
@@ -133,19 +136,23 @@ def danger_coef(distance, confirmed_cases, hdi_rank):
     )
     return fractional(1, delta - 7)
 
+
 def predicted_confirmed(population, inital_amt):
-    return population / ((1 + ((population - inital_amt) / inital_amt) * e ** ((-1 * 1.888)/103)))
+    return population / (
+        (1 + ((population - inital_amt) / inital_amt) * e ** ((-1 * 1.888) / 103))
+    )
+
 
 # MAIN
 load_data()
 # output_to_csv('latest_data.csv')
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="")
 
-# TODO add index.html
-@app.route("/")
-def hello_world():
-    return "Hello, World!"
+@app.route("/<path:path>")
+def root():
+    return send_from_directory("/static", path)
+
 
 
 @app.route("/endpoint", methods=["POST"])
@@ -153,21 +160,33 @@ def endpoint():
     if request.method == "POST":
         location = geolocator.geocode(request.form["location"])
         location = geolocator.reverse(
-            str(location.latitude) + ", " + str(location.longitude), language='en_US'
+            str(location.latitude) + ", " + str(location.longitude), language="en_US"
         )
-        country = location.raw['address']["country"]
+        country = location.raw["address"]["country"]
         closest = find_closest(location)
         closest_dist = closest[1]
-        confirmed_cases = int(locations[closest[0]].confirmed) + int(locations[closest[0]].death)
+        confirmed_cases = int(locations[closest[0]].confirmed) + int(
+            locations[closest[0]].death
+        )
         hdi = get_HDI_rank(country)
 
-        danger = "{0:.2f}%".format( danger_coef(closest_dist, confirmed_cases, int(hdi)) * 100)
+        danger = "{0:.2f}%".format(
+            danger_coef(closest_dist, confirmed_cases, int(hdi)) * 100
+        )
 
         pop = int(get_population(closest[0]))
         predicted = predicted_confirmed(pop, confirmed_cases)
         print(confirmed_cases)
         print(predicted)
-        danger2 = "{0:.2f}%".format(danger_coef(closest_dist, predicted, int(hdi)) * 100)
+        danger2 = "{0:.2f}%".format(
+            danger_coef(closest_dist, predicted, int(hdi)) * 100
+        )
 
-        out = {"closest_name":closest[0], "distance":closest_dist, "confirmed_cases":confirmed_cases, "danger_coef":danger, "predicted_danger_coef":danger2}
+        out = {
+            "closest_name": closest[0],
+            "distance": closest_dist,
+            "confirmed_cases": confirmed_cases,
+            "danger_coef": danger,
+            "predicted_danger_coef": danger2,
+        }
         return jsonify(out)

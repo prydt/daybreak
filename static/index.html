@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Daybreak - Bring to light an Outbreak</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:200,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
 <style>
 body {
     font-family: 'Montserrat', sans-serif;
@@ -28,6 +29,10 @@ h1 {
     display: inline;
     margin: 0 auto;
 }
+input{
+    display: block;
+    margin: 0 auto;
+}
 </style>
 </head>
 <body>
@@ -39,9 +44,17 @@ h1 {
         </div>
     </div>
     <div id="content">
-        <div>
-
-        </div>
+        <input id="input" type="text"/>
     </div>
+
+    <script>
+    $("#input").on('keyup', function (e) {
+    if (e.keyCode === 13) {
+        var text = e.target.value
+
+        console.log(text)
+    }
+    });
+    </script>
 </body>
 </html>
