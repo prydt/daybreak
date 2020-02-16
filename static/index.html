@@ -172,7 +172,7 @@ Receive medical attention if you feel sick
                 num = 4
             }
 
-            $('#output').html("Danger Coefficient: " + data.danger_coef + "%<br>The closest incident of the Wuhan Coronavirus is " + data.closest_name + " which is " + data.distance + " miles away with " + data.confirmed_cases + " confirmed cases. The danger coefficient is expected to increase to " +  data.predicted_danger_coef + " after a 3-month period.<br><br>" + advice[num])
+            $('#output').html("Danger Coefficient: " + data.danger_coef + "%<br>The closest incident of the Wuhan Coronavirus is " + data.closest_name + " which is " + data.distance + " miles away with " + data.confirmed_cases + " confirmed cases. The HDI rank is your location is " + data.hdi + ". The danger coefficient is expected to increase to " +  data.predicted_danger_coef + " after a 3-month period.<br><br>" + advice[num])
 
             $('#output').addClass('drop')
         })

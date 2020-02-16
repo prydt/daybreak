@@ -189,5 +189,6 @@ def endpoint():
             "confirmed_cases": confirmed_cases,
             "danger_coef": '{}'.format(danger),
             "predicted_danger_coef": danger2,
+            "hdi": hdi
         }
         return jsonify(out)
