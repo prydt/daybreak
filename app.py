@@ -5,11 +5,12 @@ from geopy.geocoders import Nominatim
 from geopy import distance
 import geopy
 from operator import itemgetter
+from math import e
 
 # global variable lol
 locations = {}
-geolocator = Nominatim(user_agent="coronavirus-tracker-thing")
-
+HDIs = {}
+geolocator = Nominatim(user_agent="daybreak-app")
 
 class Location:
     state: str
@@ -39,19 +40,13 @@ class Location:
             self.name = state + "," + country
         else:
             self.name = country
-        print(self.name)
         self.date = date
         self.confirmed = confirmed
         self.suspected = suspected
         self.recovered = recovered
         self.death = death
-
-        # location = geolocator.geocode(self.name)
-        # self.longitude = location.longitude
-        # self.latitude = location.latitude
         self.longitude = longitude
         self.latitude = latitude
-
         self.population = population
 
 
@@ -73,6 +68,11 @@ def load_data():
                 row[8],
                 row[9],
             )
+    line_count = 0
+    with open("HDI_final.csv", "r") as csvfile:
+        reader = csv.reader(csvfile, delimiter=",")
+        for row in reader:
+            HDIs[row[0]] = row[1]
 
 
 def output_to_csv(outfile):
@@ -96,11 +96,15 @@ def output_to_csv(outfile):
             )
 
 
-def find_closest(location_name):
+def get_HDI_rank(country):
+    return HDIs[country]
 
-    geocode = geolocator.geocode(location_name)
-    lat = geocode.latitude
-    lon = geocode.longitude
+def get_population(key):
+    return locations[key].population
+
+def find_closest(location):
+    lat = location.latitude
+    lon = location.longitude
     current_loc = (lat, lon)
 
     temp_list = []
@@ -108,14 +112,29 @@ def find_closest(location_name):
         temp_list.append(
             (
                 loc.state + loc.country,
-                distance.distance(current_loc, (loc.latitude, loc.longitude)).miles
+                distance.distance(current_loc, (loc.latitude, loc.longitude)).miles,
             )
         )
-        print(loc)
 
     out = sorted(temp_list, key=itemgetter(1))
-    return out[:10]
+    return out[0]
 
+
+def fractional(coef, power):
+    return coef * ((e ** power) / ((e ** power) + 1))
+
+
+def danger_coef(distance, confirmed_cases, hdi_rank):
+    delta = (
+        fractional(-7, (distance / 220.0) - 5)
+        + 7
+        + fractional(6, (confirmed_cases / 90.0) - 5)
+        + fractional(1, (hdi_rank / 17.0) - 4)
+    )
+    return fractional(1, delta - 7)
+
+def predicted_confirmed(population, inital_amt):
+    return population / ((1 + ((population - inital_amt) / inital_amt) * e ** ((-1 * 1.888)/103)))
 
 # MAIN
 load_data()
@@ -132,4 +151,23 @@ def hello_world():
 @app.route("/endpoint", methods=["POST"])
 def endpoint():
     if request.method == "POST":
-        return jsonify(find_closest(request.form["location"]))
+        location = geolocator.geocode(request.form["location"])
+        location = geolocator.reverse(
+            str(location.latitude) + ", " + str(location.longitude), language='en_US'
+        )
+        country = location.raw['address']["country"]
+        closest = find_closest(location)
+        closest_dist = closest[1]
+        confirmed_cases = int(locations[closest[0]].confirmed) + int(locations[closest[0]].death)
+        hdi = get_HDI_rank(country)
+
+        danger = "{0:.2f}%".format( danger_coef(closest_dist, confirmed_cases, int(hdi)) * 100)
+
+        pop = int(get_population(closest[0]))
+        predicted = predicted_confirmed(pop, confirmed_cases)
+        print(confirmed_cases)
+        print(predicted)
+        danger2 = "{0:.2f}%".format(danger_coef(closest_dist, predicted, int(hdi)) * 100)
+
+        out = {"closest_name":closest[0], "distance":closest_dist, "confirmed_cases":confirmed_cases, "danger_coef":danger, "predicted_danger_coef":danger2}
+        return jsonify(out)
