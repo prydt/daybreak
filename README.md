@@ -1,4 +1,4 @@
-<span style="display:block;text-align:center"><img src="image.png" alt="Image of Daybreak"></span>
+<p align="center"><img src="image.png" alt="Image of Daybreak"><</p>
 
 # Daybreak
 
