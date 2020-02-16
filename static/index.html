@@ -70,6 +70,13 @@ input{
     -webkit-filter: invert(1);
     filter: invert(1);
 }
+button {
+    border: 0;
+    background: none;
+    box-shadow: none;
+    border-radius: 0px;
+    color: black;
+}
 </style>
 </head>
 <body>
@@ -117,6 +124,7 @@ Receive medical attention if you feel sick
         });
         toggle = !toggle
         $('#output').css('color', 'white')
+        $('#dark').css('color', 'white')
         $('body').css('background', 'black')
         }
         else
@@ -126,6 +134,7 @@ Receive medical attention if you feel sick
             });
             $('#output').css('color', 'black')
         $('body').css('background', 'white')
+        $('#dark').css('color', 'black')
             toggle = !toggle
         }
     })
